@@ -1,5 +1,22 @@
 # preprint-fulltext
 
+<p align="center">
+  <b>English</b> |
+  <a href="README.zh.md">简体中文</a> |
+  <a href="README.zht.md">繁體中文</a> |
+  <a href="README.ko.md">한국어</a> |
+  <a href="README.de.md">Deutsch</a> |
+  <a href="README.es.md">Español</a> |
+  <a href="README.fr.md">Français</a> |
+  <a href="README.it.md">Italiano</a> |
+  <a href="README.ja.md">日本語</a>
+</p>
+
+[![PyPI](https://img.shields.io/pypi/v/preprint-fulltext.svg)](https://pypi.org/project/preprint-fulltext/)
+[![Python](https://img.shields.io/pypi/pyversions/preprint-fulltext.svg)](https://pypi.org/project/preprint-fulltext/)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](LICENSE)
+[![CI](https://github.com/genecell/preprint-fulltext/actions/workflows/test.yml/badge.svg)](https://github.com/genecell/preprint-fulltext/actions/workflows/test.yml)
+
 Retrieve the **full text** of bioRxiv / medRxiv / **arXiv** preprints as clean,
 structured, embedding-ready data — from a CLI, a Python library, or an MCP server.
 
@@ -11,6 +28,13 @@ text-and-data-mining (TDM) compliance is enforced structurally, not left to the 
 > **"Embedding-ready" means the output is clean, section-aware, token-bounded chunks —
 > ready to feed to *your* embedding model. Computing embeddings is an optional last step
 > you own; this tool does not bundle an embedding model.**
+
+## Contents
+
+- [Why](#why) · [Who it's for](#who-its-for) · [Full text for AI-driven science](#full-text-for-ai-driven-science)
+- [Features](#features) · [Install](#install) · [Quickstart (CLI)](#quickstart-cli) · [Typical workflows](#typical-workflows)
+- [Python library](#python) · [**MCP server (coding agents)**](#mcp-server) · [Data sources & routing](#data-sources--routing)
+- [Configuration](#configuration) · [Compliance](#compliance) · [Development](#development) · [Contact](#contact) · [License](#license)
 
 ---
 
@@ -175,16 +199,123 @@ chunks = chunk_fulltext(result.fulltext)   # embedding-ready Chunk records
 
 ## MCP server
 
-```bash
-preprint-fulltext-mcp        # stdio MCP server
-```
+Give a coding agent live preprint access. The server exposes four tools —
+`search_preprints`, `get_fulltext`, `get_metadata`, `resolve` — over stdio. (Bulk `ingest`
+is intentionally **not** a tool: it is long-running and incurs requester-pays cost.)
 
 `mcp-name: io.github.genecell/preprint-fulltext`
 
-Exposes `search_preprints`, `get_fulltext`, `get_metadata`, and `resolve`. Bulk
-ingestion is intentionally **not** an MCP tool (it is long-running and incurs
-requester-pays cost). See [`skills/preprint-fulltext/SKILL.md`](skills/preprint-fulltext/SKILL.md)
-for agent-facing usage.
+It's a **local stdio** server, so it works in Claude Code / Cursor / VS Code / Windsurf /
+Zed / Codex / Cline — but not the claude.ai web app (there, use the
+[Skill](skills/preprint-fulltext/SKILL.md) instead).
+
+### Recommended: run via `uvx` (no install)
+
+[uv](https://docs.astral.sh/uv/) runs the published package on demand — nothing to
+`pip install` or keep on a PATH. Install uv once:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh    # macOS / Linux
+# or:  pipx install uv  |  pip install --user uv  |  brew install uv  |  winget install astral-sh.uv
+```
+
+The launch command is `uvx --from preprint-fulltext preprint-fulltext-mcp` (the `--from` is
+needed because the run command differs from the package name). First launch downloads the
+package (~30 s); later launches are cached.
+
+<details>
+<summary><b>Claude Code</b> — key <code>mcpServers</code></summary>
+
+```bash
+claude mcp add preprint-fulltext --scope user -- uvx --from preprint-fulltext preprint-fulltext-mcp
+# uvx not on PATH? use its absolute path:
+claude mcp add preprint-fulltext --scope user -- "$(which uvx)" --from preprint-fulltext preprint-fulltext-mcp
+claude mcp get preprint-fulltext        # verify → Status: ✔ Connected
+```
+
+Or edit `~/.claude.json` (user) / project `.mcp.json`:
+
+```json
+{ "mcpServers": { "preprint-fulltext": {
+  "command": "uvx",
+  "args": ["--from", "preprint-fulltext", "preprint-fulltext-mcp"],
+  "env": { "CONTACT_EMAIL": "you@example.org" }
+} } }
+```
+</details>
+
+<details>
+<summary><b>Cursor / Windsurf / Cline / Continue</b> — key <code>mcpServers</code> (same shape)</summary>
+
+Cursor: `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project). Windsurf:
+`~/.codeium/windsurf/mcp_config.json`. Cline: *MCP Servers → Configure*. Continue:
+`~/.continue/config`.
+
+```json
+{ "mcpServers": { "preprint-fulltext": {
+  "command": "uvx",
+  "args": ["--from", "preprint-fulltext", "preprint-fulltext-mcp"],
+  "env": { "CONTACT_EMAIL": "you@example.org" }
+} } }
+```
+</details>
+
+<details>
+<summary><b>VS Code</b> (GitHub Copilot, Agent mode) — key <code>servers</code> + <code>type</code></summary>
+
+`.vscode/mcp.json` (workspace) or user `settings.json` under `"mcp"`:
+
+```json
+{ "servers": { "preprint-fulltext": {
+  "type": "stdio",
+  "command": "uvx",
+  "args": ["--from", "preprint-fulltext", "preprint-fulltext-mcp"]
+} } }
+```
+
+Or one-shot: `code --add-mcp '{"name":"preprint-fulltext","command":"uvx","args":["--from","preprint-fulltext","preprint-fulltext-mcp"]}'`
+</details>
+
+<details>
+<summary><b>Zed</b> — key <code>context_servers</code> (different shape)</summary>
+
+`~/.config/zed/settings.json`:
+
+```json
+{ "context_servers": { "preprint-fulltext": {
+  "source": "custom",
+  "command": "uvx",
+  "args": ["--from", "preprint-fulltext", "preprint-fulltext-mcp"],
+  "env": {}
+} } }
+```
+</details>
+
+<details>
+<summary><b>Codex</b> (OpenAI Codex CLI) — TOML, not JSON</summary>
+
+`~/.codex/config.toml`:
+
+```toml
+[mcp_servers.preprint-fulltext]
+command = "uvx"
+args = ["--from", "preprint-fulltext", "preprint-fulltext-mcp"]
+# env = { CONTACT_EMAIL = "you@example.org" }
+```
+
+Or: `codex mcp add preprint-fulltext -- uvx --from preprint-fulltext preprint-fulltext-mcp`
+</details>
+
+### Alternative: install with pip
+
+If you already `pip install preprint-fulltext`, the server is on your PATH as
+`preprint-fulltext-mcp` — use `"command": "preprint-fulltext-mcp"` (no `args`) in any config
+above.
+
+> **Env vars:** set `CONTACT_EMAIL` (Europe PMC / OpenAlex polite pools) and
+> `OPENALEX_API_KEY` (only for OpenAlex search/discover) via the config's `env` block, or in
+> your shell before launching the client. See [`SKILL.md`](skills/preprint-fulltext/SKILL.md)
+> for the full agent-facing tool reference.
 
 ## Data sources & routing
 

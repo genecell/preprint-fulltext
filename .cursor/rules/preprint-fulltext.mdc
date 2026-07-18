@@ -82,7 +82,8 @@ chunks = chunk_fulltext(ft)              # list[Chunk], embedding-ready
 
 ## MCP tools
 
-Run `preprint-fulltext-mcp` (stdio). Tools:
+Run via `uvx --from preprint-fulltext preprint-fulltext-mcp` (no install), or
+`preprint-fulltext-mcp` if pip-installed. Stdio JSON-RPC. Tools:
 - `search_preprints(query, source?, limit?)` → list of hits
 - `get_fulltext(doi, as_markdown?)` → structured sections (or Markdown)
 - `get_metadata(doi)` → bibliographic metadata (abstract only)

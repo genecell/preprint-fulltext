@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.genecell/preprint-fulltext",
-  "description": "Retrieve full text of bioRxiv/medRxiv/arXiv preprints as structured sections to ground scientific reasoning and deep research for coding agents (Europe PMC + openRxiv S3 + arXiv LaTeXML), with search and discovery.",
+  "description": "bioRxiv/medRxiv/arXiv preprint full text as structured sections for AI agents + search.",
   "version": "0.1.0",
   "repository": {
     "url": "https://github.com/genecell/preprint-fulltext",

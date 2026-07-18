@@ -1,0 +1,12 @@
+{
+  "hitCount": 3,
+  "nextCursorMark": "CURSOR2",
+  "resultList": {
+    "result": [
+      {"id": "PPR100001", "source": "PPR", "doi": "10.1101/2024.01.15.575000",
+       "title": "A Test Preprint on Widgets", "inEPMC": "Y"},
+      {"id": "PPR100002", "source": "PPR", "doi": "10.1101/2024.03.03.111111",
+       "title": "Widgets Revisited", "inEPMC": "N", "hasTextMinedTerms": "N"}
+    ]
+  }
+}

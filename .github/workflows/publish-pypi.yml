@@ -1,0 +1,26 @@
+name: publish-pypi
+# Publish preprint-fulltext to PyPI on a GitHub Release, via PyPI Trusted Publishing
+# (OIDC — no API token needed). ONE-TIME SETUP: on pypi.org add a Trusted Publisher for
+# project "preprint-fulltext" pointing at genecell/preprint-fulltext + this workflow, with
+# the environment field left blank. (A GitHub Environment is optional — add one on both
+# sides only if you want a manual-approval gate before publishing.)
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write        # OIDC identity for Trusted Publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install build
+          python -m build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

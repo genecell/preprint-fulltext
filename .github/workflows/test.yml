@@ -1,0 +1,43 @@
+name: test
+# Offline test suite (respx mocks HTTP, moto mocks S3) + lint. No live network,
+# no AWS, no cost — matches the project's "green offline by default" guarantee.
+on:
+  push: { branches: [master, main] }
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install (dev extras)
+        run: python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check preprint_fulltext/
+      - name: Test (offline)
+        run: pytest -q
+      - name: Build sdist + wheel
+        run: |
+          python -m pip install build
+          python -m build
+
+  docs-sync:
+    # Fail if the generated agent docs are stale vs skills/preprint-fulltext/SKILL.md.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Regenerate agent docs and check for drift
+        run: |
+          python scripts/build_agent_docs.py
+          git diff --exit-code -- AGENTS.md llms.txt .cursor .github/copilot-instructions.md \
+            || (echo "::error::agent docs are stale — run: python scripts/build_agent_docs.py" && exit 1)

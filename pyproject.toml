@@ -1,0 +1,72 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "preprint-fulltext"
+version = "0.1.0"
+description = "CLI + MCP toolkit that retrieves full text of bioRxiv/medRxiv/arXiv preprints as structured sections — grounding LLM/agent scientific reasoning and deep research — and builds embedding-ready corpora."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [{ name = "Min Dai", email = "dai@broadinstitute.org" }]
+keywords = ["biorxiv", "medrxiv", "preprint", "jats", "fulltext", "embeddings", "mcp", "openrxiv"]
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Text Processing :: Markup :: XML",
+]
+dependencies = [
+  "pydantic>=2",
+  "pydantic-settings>=2",
+  "httpx>=0.27",
+  "lxml>=5",
+  "boto3>=1.34",
+  "typer>=0.12",
+  "rich>=13",
+  "tiktoken>=0.7",
+  "orjson>=3.9",
+]
+
+[project.optional-dependencies]
+# The MCP server is built in (zero extra deps); no 'mcp' extra needed.
+parquet = ["pyarrow>=15"]
+embed = ["sentence-transformers>=2"]
+openalex = ["pyalex>=0.15"]
+test = [
+  "pytest>=8",
+  "respx>=0.21",
+  "moto[s3]>=5",
+  "pytest-recording>=0.13",
+]
+dev = [
+  "preprint-fulltext[parquet,openalex,test]",
+  "ruff>=0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/genecell/preprint-fulltext"
+Repository = "https://github.com/genecell/preprint-fulltext"
+
+[project.scripts]
+preprint-fulltext = "preprint_fulltext.cli:app"
+preprint-fulltext-mcp = "preprint_fulltext.mcp_server:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["preprint_fulltext"]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+  "live: opt-in tests that hit the live network; skipped unless PREPRINT_FULLTEXT_LIVE=1",
+  "live_s3: opt-in requester-pays S3 tests; skipped unless PREPRINT_FULLTEXT_LIVE_S3=1",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

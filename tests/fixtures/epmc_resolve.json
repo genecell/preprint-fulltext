@@ -1,0 +1,15 @@
+{
+  "hitCount": 1,
+  "resultList": {
+    "result": [
+      {
+        "id": "PPR100001",
+        "source": "PPR",
+        "doi": "10.1101/2024.01.15.575000",
+        "title": "A Test Preprint on Widgets",
+        "inEPMC": "Y",
+        "isOpenAccess": "Y"
+      }
+    ]
+  }
+}

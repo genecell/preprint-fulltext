@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.genecell/preprint-fulltext",
+  "description": "Retrieve full text of bioRxiv/medRxiv/arXiv preprints as structured sections to ground scientific reasoning and deep research for coding agents (Europe PMC + openRxiv S3 + arXiv LaTeXML), with search and discovery.",
+  "version": "0.1.0",
+  "repository": {
+    "url": "https://github.com/genecell/preprint-fulltext",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/genecell/preprint-fulltext",
+  "packages": [
+    {
+      "registryType": "pypi",
+      "registryBaseUrl": "https://pypi.org",
+      "identifier": "preprint-fulltext",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "CONTACT_EMAIL",
+          "description": "Email for the Europe PMC / OpenAlex polite pools (recommended).",
+          "isRequired": false
+        },
+        {
+          "name": "OPENALEX_API_KEY",
+          "description": "OpenAlex API key (only needed for OpenAlex discover/search; required by OpenAlex since 2026-02-13).",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

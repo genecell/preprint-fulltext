@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns:xlink="http://www.w3.org/1999/xlink" article-type="research-article">
+  <front>
+    <journal-meta>
+      <journal-id journal-id-type="publisher">bioRxiv</journal-id>
+    </journal-meta>
+    <article-meta>
+      <article-id pub-id-type="doi">10.1101/2024.01.15.575000</article-id>
+      <title-group>
+        <article-title>A Test Preprint on <italic>Widgets</italic></article-title>
+      </title-group>
+      <contrib-group>
+        <contrib contrib-type="author">
+          <name><surname>Lovelace</surname><given-names>Ada</given-names></name>
+        </contrib>
+        <contrib contrib-type="author">
+          <name><surname>Turing</surname><given-names>Alan</given-names></name>
+        </contrib>
+      </contrib-group>
+      <permissions>
+        <copyright-statement>&#169; 2024, The Authors</copyright-statement>
+        <license license-type="open-access"
+                 xlink:href="http://creativecommons.org/licenses/by/4.0/">
+          <license-p>This is an open access article distributed under the terms of the
+          Creative Commons Attribution 4.0 International License (CC BY 4.0).</license-p>
+        </license>
+      </permissions>
+      <abstract>
+        <p>We study widgets. Our <xref ref-type="bibr" rid="c1">[1]</xref> approach
+        works well across conditions.</p>
+      </abstract>
+      <abstract abstract-type="graphical">
+        <p>GRAPHICAL_ABSTRACT_SHOULD_BE_SKIPPED</p>
+      </abstract>
+    </article-meta>
+  </front>
+  <body>
+    <sec sec-type="intro">
+      <title>Introduction</title>
+      <p>Widgets are important devices <xref ref-type="bibr" rid="c1">[1]</xref> in
+      many fields.</p>
+    </sec>
+    <sec sec-type="methods">
+      <title>Materials and Methods</title>
+      <p>We measured widgets under controlled conditions.</p>
+      <sec>
+        <title>Sample preparation</title>
+        <p>We prepared samples carefully before each run.</p>
+      </sec>
+      <table-wrap id="t1">
+        <label>Table 1</label>
+        <caption><p>Widget counts by group.</p></caption>
+        <table>
+          <tbody><tr><td>TABLE_CELL_TEXT_42</td></tr></tbody>
+        </table>
+      </table-wrap>
+    </sec>
+    <sec sec-type="results">
+      <title>Results</title>
+      <p>We found significantly more widgets in the treatment group.</p>
+      <disp-formula id="e1">DISP_FORMULA_SHOULD_BE_DROPPED</disp-formula>
+      <p>The effect size was large <inline-formula>INLINE_FORMULA_DROPPED</inline-formula>
+      and consistent.</p>
+    </sec>
+    <sec>
+      <title>Discussion and Conclusion</title>
+      <p>Widgets matter, and future work should scale the analysis.</p>
+    </sec>
+  </body>
+  <back>
+    <ref-list>
+      <title>References</title>
+      <ref id="c1">
+        <mixed-citation>Author A. REFERENCE_TEXT_SHOULD_BE_STRIPPED. Journal. 2020.</mixed-citation>
+      </ref>
+    </ref-list>
+  </back>
+</article>

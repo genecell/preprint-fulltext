@@ -1,0 +1,12 @@
+{
+  "name": "preprint-fulltext",
+  "version": "0.1.0",
+  "description": "Retrieve full text of bioRxiv/medRxiv/arXiv preprints as structured sections to ground scientific reasoning and deep research, search/discover preprints, and build embedding-ready corpora (Europe PMC + openRxiv S3 + arXiv LaTeXML), via CLI and MCP.",
+  "author": {
+    "name": "Min Dai",
+    "email": "dai@broadinstitute.org",
+    "url": "https://fishelllab.hms.harvard.edu"
+  },
+  "homepage": "https://github.com/genecell/preprint-fulltext",
+  "license": "BSD-3-Clause"
+}

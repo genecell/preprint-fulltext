@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xmlns:arxiv="http://arxiv.org/schemas/atom">
+  <opensearch:totalResults xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/">1</opensearch:totalResults>
+  <entry>
+    <id>http://arxiv.org/abs/2401.10515v2</id>
+    <published>2024-01-19T00:00:00Z</published>
+    <updated>2024-06-01T00:00:00Z</updated>
+    <title>Coevolutionary Computation for Widget Optimization</title>
+    <summary>  We present a coevolutionary approach to widget optimization that
+scales across many conditions.
+</summary>
+    <author><name>Ada Lovelace</name></author>
+    <author><name>Alan Turing</name></author>
+    <arxiv:primary_category term="cs.NE" scheme="http://arxiv.org/schemas/atom"/>
+    <arxiv:doi>10.1000/journal.widgets.2024</arxiv:doi>
+    <link href="http://arxiv.org/abs/2401.10515v2" rel="alternate" type="text/html"/>
+  </entry>
+</feed>

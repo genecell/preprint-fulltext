@@ -1,0 +1,18 @@
+{
+  "messages": [{"status": "ok", "total": 1}],
+  "collection": [
+    {
+      "doi": "10.1101/2024.01.15.575000",
+      "title": "A Test Preprint on Widgets",
+      "authors": "Lovelace, A.; Turing, A.",
+      "author_corresponding": "Ada Lovelace",
+      "date": "2024-01-15",
+      "version": "1",
+      "category": "neuroscience",
+      "abstract": "We study widgets.",
+      "published": "10.1000/widgets.published",
+      "license": "cc_by",
+      "server": "biorxiv"
+    }
+  ]
+}

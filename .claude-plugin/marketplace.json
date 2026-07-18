@@ -1,0 +1,15 @@
+{
+  "name": "preprint-fulltext",
+  "owner": {
+    "name": "Min Dai",
+    "email": "dai@broadinstitute.org",
+    "url": "https://fishelllab.hms.harvard.edu"
+  },
+  "plugins": [
+    {
+      "name": "preprint-fulltext",
+      "source": ".",
+      "description": "Retrieve bioRxiv/medRxiv/arXiv preprint full text as structured sections; search/discover preprints; build embedding-ready corpora. CLI + MCP."
+    }
+  ]
+}

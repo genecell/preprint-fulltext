@@ -1,0 +1,10 @@
+{
+  "hitCount": 3,
+  "nextCursorMark": "CURSOR2",
+  "resultList": {
+    "result": [
+      {"id": "PPR100003", "source": "PPR", "doi": "10.1101/2024.04.04.222222",
+       "title": "A Third Widget Study", "inEPMC": "Y"}
+    ]
+  }
+}

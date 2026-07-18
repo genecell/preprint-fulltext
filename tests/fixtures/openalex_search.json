@@ -1,0 +1,24 @@
+{
+  "meta": {"count": 2, "next_cursor": null},
+  "results": [
+    {
+      "id": "https://openalex.org/W111",
+      "doi": "https://doi.org/10.1101/2024.01.15.575000",
+      "title": "A Test Preprint on Widgets",
+      "relevance_score": 42.5,
+      "has_fulltext": true,
+      "best_oa_location": {"pdf_url": "https://www.biorxiv.org/content/10.1101/2024.01.15.575000.full.pdf",
+                            "landing_page_url": "https://www.biorxiv.org/content/10.1101/2024.01.15.575000"},
+      "abstract_inverted_index": {"We": [0], "study": [1], "widgets": [2], "here": [3]}
+    },
+    {
+      "id": "https://openalex.org/W222",
+      "doi": "https://doi.org/10.1101/2024.03.03.111111",
+      "title": "Widgets Revisited",
+      "relevance_score": 12.0,
+      "has_fulltext": false,
+      "best_oa_location": null,
+      "abstract_inverted_index": null
+    }
+  ]
+}

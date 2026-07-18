@@ -1,0 +1,28 @@
+name: live-smoke
+# Opt-in LIVE smoke against the real public APIs (Europe PMC, arXiv, bioRxiv/medRxiv JSON API).
+# Kept OUT of the normal `test` job so CI stays offline/free by default. Run it manually
+# before a release, or on the weekly schedule, to catch upstream API drift (e.g. an endpoint
+# change or a new DOI prefix). Uses the CONTACT_EMAIL repo variable for the polite pools.
+#
+# NOTE: requester-pays S3 live tests are NOT run here (cost); they stay behind
+# PREPRINT_FULLTEXT_LIVE_S3 and are exercised locally with credentials only.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"          # Mondays 06:00 UTC
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: Install
+        run: python -m pip install -e ".[dev]"
+      - name: Live smoke (Europe PMC + arXiv + bioRxiv/medRxiv metadata; OpenAlex if key set)
+        env:
+          PREPRINT_FULLTEXT_LIVE: "1"
+          CONTACT_EMAIL: ${{ vars.CONTACT_EMAIL }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}   # optional; OpenAlex test skips if unset
+        run: pytest -m live -v

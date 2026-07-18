@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# Tooling
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Project
+.cache/
+*.jsonl
+*.parquet
+_manifest.jsonl
+preprint-fulltext.toml
+
+# stato — version the captured modules, but not transient history
+.stato/.history/
+
+# OS
+.DS_Store
+
+# internal dev context (lives at the project root, not in the public package)
+.stato/
+CLAUDE.md

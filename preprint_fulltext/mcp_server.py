@@ -12,8 +12,9 @@ is written to stdout; diagnostics go to stderr. Bulk ingest is intentionally NOT
 from __future__ import annotations
 
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Optional
+from typing import Any
 
 import orjson
 
@@ -27,9 +28,9 @@ LATEST_PROTOCOL_VERSION = SUPPORTED_PROTOCOL_VERSIONS[0]
 # --- tool implementation functions (also imported directly by tests) ---------
 def get_fulltext_impl(
     doi: str,
-    version: Optional[int] = None,
-    source: Optional[str] = None,
-    server: Optional[str] = None,
+    version: int | None = None,
+    source: str | None = None,
+    server: str | None = None,
     as_markdown: bool = False,
     allow_html: bool = False,
     links: str = "inline",
@@ -219,7 +220,7 @@ class MCPServer:
     def _err(id_, code: int, message: str) -> dict:
         return {"jsonrpc": "2.0", "id": id_, "error": {"code": code, "message": message}}
 
-    def dispatch(self, msg: dict) -> Optional[dict]:
+    def dispatch(self, msg: dict) -> dict | None:
         """Handle one JSON-RPC message. Returns a response dict, or None for notifications."""
         method = msg.get("method")
         id_ = msg.get("id")
@@ -257,7 +258,7 @@ class MCPServer:
             result = tool.handler(**arguments)
         except TypeError as e:
             return self._err(id_, -32602, f"Invalid arguments for {name}: {e}")
-        except Exception as e:  # tool execution error -> reported in-band with isError
+        except Exception as e:  # noqa: BLE001 - tool execution error reported in-band with isError
             return self._ok(id_, {
                 "content": [{"type": "text", "text": f"{type(e).__name__}: {e}"}],
                 "isError": True,

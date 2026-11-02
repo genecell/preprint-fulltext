@@ -2,7 +2,7 @@
 
 Why this exists: for a brand-new or non-CC (e.g. ``cc_no``) preprint, Europe PMC has
 no retrievable full text and S3 needs AWS credentials + requester-pays cost (and lags
-until the month closes). The public ``…​.full`` HTML page is then the only free
+until the month closes). The public ``….full`` HTML page is then the only free
 full-text route. This is defensible for personal analysis/reading of a single paper.
 
 GUARDRAILS (deliberate):
@@ -460,7 +460,7 @@ def parse_biorxiv_html(
     base_url: str | None = None,
     encoding: str | None = None,
 ) -> ParsedArticle:
-    """Parse a bioRxiv/medRxiv ``…​.full`` HTML page into a :class:`ParsedArticle`."""
+    """Parse a bioRxiv/medRxiv ``….full`` HTML page into a :class:`ParsedArticle`."""
     opts = options or TextOptions()
     art = ParsedArticle(text_options=opts.as_dict())
     try:
@@ -469,7 +469,7 @@ def parse_biorxiv_html(
             root = lxml_html.fromstring(html_bytes, parser=hp)
         else:
             root = lxml_html.fromstring(html_bytes)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return art
 
     def meta(name: str) -> str | None:
@@ -564,7 +564,7 @@ class BiorxivHTML:
                     t_resp.content, parser=lxml_html.HTMLParser(encoding=enc)
                 )
                 tables = frag.xpath(".//table") if frag.tag != "table" else [frag]
-            except Exception:
+            except Exception:  # noqa: BLE001
                 tables = []
             if tables:
                 rows, header_rows = parse_table_grid(
@@ -605,7 +605,7 @@ class BiorxivHTML:
             return None, False
         try:
             parsed = parse_jats(resp.content, options=opts)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             self.last_error = f"invalid JATS XML: {exc}"
             return None, False
         if not parsed.sections and not parsed.abstract:
@@ -692,7 +692,7 @@ class BiorxivHTML:
             from .biorxiv_api import BiorxivAPI
 
             meta = BiorxivAPI(self.settings).get_metadata(parsed.doi or doi, server=srv)
-        except Exception:
+        except Exception:  # noqa: BLE001
             meta = None
         if meta is not None and meta.license is not None and not parsed.license_raw:
             parsed.license_raw = {"href": None, "text": meta.license.raw}

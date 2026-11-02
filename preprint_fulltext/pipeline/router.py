@@ -30,7 +30,7 @@ def _have_aws_credentials() -> bool:
         import boto3
 
         return boto3.Session().get_credentials() is not None
-    except Exception:
+    except Exception:  # noqa: BLE001
         return False
 
 
@@ -83,7 +83,7 @@ class Router:
             self._last_versions = versions
             meta = versions[-1] if versions else None
             return meta, (meta.version if meta else None)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return None, None
 
     @staticmethod
@@ -258,4 +258,4 @@ class Router:
         return GetResult(None, tried, "; ".join(notes))
 
 
-__all__ = ["Router", "GetResult"]
+__all__ = ["GetResult", "Router"]

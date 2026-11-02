@@ -81,4 +81,4 @@ def _link_back_stub(ft: FullText) -> FullText:
     )
 
 
-__all__ = ["Gate", "GateResult", "ExportMode"]
+__all__ = ["ExportMode", "Gate", "GateResult"]

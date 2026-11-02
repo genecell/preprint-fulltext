@@ -30,8 +30,8 @@ def resolve(identifier: str, settings: Settings | None = None) -> dict:
                 out["published_doi"] = meta.published_doi
     elif short.upper().startswith("W"):
         out["openalex_id"] = short
-        from ..sources.openalex import BASE, OpenAlex
         from ..core.http import build_client, request_with_retry
+        from ..sources.openalex import BASE, OpenAlex
 
         oa = OpenAlex(settings)
         resp = request_with_retry(build_client(settings), "GET", f"{BASE}/works/{short}",

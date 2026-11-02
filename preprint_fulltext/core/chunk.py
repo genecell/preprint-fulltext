@@ -158,7 +158,7 @@ def _chunk_cross_section(ft: FullText, license_: License, settings: Settings) ->
     for idx, (cstart, cend, tcount) in enumerate(
         _pack_section(doc, tok, settings.chunk_tokens, settings.chunk_overlap)
     ):
-        kind, order = kind_at(cstart)
+        kind, _order = kind_at(cstart)
         out.append(
             Chunk(doi=p.doi, version=p.version, chunk_id=f"{p.doi}:{ver}:x:{idx}",
                   section_kind=kind, text=doc[cstart:cend], token_count=tcount,

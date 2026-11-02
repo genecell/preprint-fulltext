@@ -717,8 +717,7 @@ def parse_table_grid(
                     cc = c_idx + dc
                     if rr < n_rows:
                         grid[(rr, cc)] = text if (dr == 0 and dc == 0) else ""
-                        if cc + 1 > max_col:
-                            max_col = cc + 1
+                        max_col = max(max_col, cc + 1)
             c_idx += colspan
 
     rows: list[list[str]] = []
@@ -729,20 +728,20 @@ def parse_table_grid(
 
 __all__ = [
     "TEXT_FORMAT",
-    "TextOptions",
-    "ParsedFigure",
-    "ParsedTable",
-    "ParsedLink",
     "ParsedCitation",
-    "ParsedXref",
+    "ParsedFigure",
     "ParsedFormula",
+    "ParsedLink",
+    "ParsedTable",
+    "ParsedXref",
     "SectionAccumulator",
+    "TextOptions",
     "classify_section",
-    "render_sup",
-    "render_sub",
-    "render_link",
     "linearize_mathml",
     "parse_table_grid",
+    "render_link",
+    "render_sub",
+    "render_sup",
     "rows_to_markdown",
     "urljoin",
 ]

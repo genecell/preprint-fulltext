@@ -124,10 +124,10 @@ def identify(value: str) -> tuple[str, str, int | None]:
 
 
 __all__ = [
-    "normalize_doi",
-    "split_doi_version",
-    "split_arxiv_id",
-    "normalize_arxiv_id",
     "arxiv_doi",
     "identify",
+    "normalize_arxiv_id",
+    "normalize_doi",
+    "split_arxiv_id",
+    "split_doi_version",
 ]

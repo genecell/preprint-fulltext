@@ -10,6 +10,7 @@ credits, so `get_metadata` uses the free singleton endpoint.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from typing import ClassVar
 
 from ..config import Settings, get_settings
 from ..core.http import build_client, request_with_retry
@@ -115,7 +116,7 @@ class OpenAlex:
                 return
 
     # OpenAlex field-scoped search: title/abstract/author use filters, else free search=.
-    _FILTER_FIELD = {
+    _FILTER_FIELD: ClassVar[dict[str, str]] = {
         "title": "title.search",
         "abstract": "abstract.search",
         "author": "raw_author_name.search",

@@ -44,4 +44,4 @@ class Source(Protocol):
     def get_metadata(self, doi: str) -> Preprint | None: ...
 
 
-__all__ = ["Source", "DiscoverQuery", "NotSupported", "SourceError"]
+__all__ = ["DiscoverQuery", "NotSupported", "Source", "SourceError"]

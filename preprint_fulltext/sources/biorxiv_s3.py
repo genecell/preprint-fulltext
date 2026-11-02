@@ -270,7 +270,7 @@ def extract_article_xml(meca_bytes: bytes) -> bytes | None:
                         continue
                     if href.lower().endswith(".xml") and href in names:
                         return zf.read(href)
-            except Exception:
+            except Exception:  # noqa: BLE001, S110
                 pass  # fall through to size heuristic
         # 2) largest content/*.xml (excluding MECA packaging XMLs).
         xmls = [
@@ -351,12 +351,11 @@ class BiorxivS3:
     def _list_prefix_objects(self, bucket: str, prefix: str) -> Iterator[dict]:
         token = None
         while True:
-            kwargs = dict(Bucket=bucket, Prefix=prefix, RequestPayer="requester")
+            kwargs = {"Bucket": bucket, "Prefix": prefix, "RequestPayer": "requester"}
             if token:
                 kwargs["ContinuationToken"] = token
             resp = self.client.list_objects_v2(**kwargs)
-            for obj in resp.get("Contents", []) or []:
-                yield obj
+            yield from resp.get("Contents", []) or []
             if not resp.get("IsTruncated"):
                 return
             token = resp.get("NextContinuationToken")
@@ -419,7 +418,7 @@ class BiorxivS3:
                     if entry.compress_method == 0:
                         self.cache.put(cache_key, raw)
                         return raw
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
 
         # Fallback: full .meca download if extra field >256B or non-standard compression
@@ -543,7 +542,7 @@ class BiorxivS3:
                     if xml_b:
                         ck = self.cache.key("biorxiv_s3_xml", bucket, k, entry.xml_filename)
                         cached_xml = (ck, xml_b)
-            except Exception:
+            except Exception:  # noqa: BLE001
                 entry = None
 
             row_tuple = (

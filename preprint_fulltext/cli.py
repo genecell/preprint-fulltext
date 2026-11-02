@@ -11,7 +11,6 @@ import datetime as dt
 import sys
 from collections.abc import Iterable, Iterator
 from pathlib import Path
-from typing import Optional
 
 import orjson
 import typer
@@ -36,7 +35,7 @@ def _dumps(obj) -> bytes:
     return orjson.dumps(obj, option=orjson.OPT_INDENT_2)
 
 
-def _write_hits_jsonl(hits: Iterable[SearchHit], out: Optional[Path], limit: int) -> int:
+def _write_hits_jsonl(hits: Iterable[SearchHit], out: Path | None, limit: int) -> int:
     """Stream SearchHit records as one JSON object per line; returns the count."""
     fh = out.open("wb") if out else sys.stdout.buffer
     n = 0
@@ -53,7 +52,7 @@ def _write_hits_jsonl(hits: Iterable[SearchHit], out: Optional[Path], limit: int
     return n
 
 
-def _since_to_date(since: Optional[str]) -> Optional[dt.date]:
+def _since_to_date(since: str | None) -> dt.date | None:
     """Accept YYYY-MM or YYYY-MM-DD; map YYYY-MM to the first of the month."""
     if not since:
         return None
@@ -114,11 +113,11 @@ def version() -> None:
 @app.command()
 def get(
     doi: str = typer.Argument(..., help="DOI, arXiv id, or a doi.org/bioRxiv/arxiv.org URL."),
-    version: Optional[int] = typer.Option(None, "--version", "-v", help="Specific version."),
-    source: Optional[str] = typer.Option(
+    version: int | None = typer.Option(None, "--version", "-v", help="Specific version."),
+    source: str | None = typer.Option(
         None, "--source", help="Force a source: europepmc | s3 | html | arxiv (default: auto)."
     ),
-    server: Optional[str] = typer.Option(None, "--server", help="biorxiv | medrxiv (hint for S3/HTML)."),
+    server: str | None = typer.Option(None, "--server", help="biorxiv | medrxiv (hint for S3/HTML)."),
     html: bool = typer.Option(
         False, "--html", help="Allow the public HTML page when Europe PMC / S3 do not return full text."
     ),
@@ -135,7 +134,7 @@ def get(
         False, "--fetch-tables", help="Opt-in: fetch external Highwire table markup on the HTML route."
     ),
     markdown: bool = typer.Option(False, "--markdown", "-m", help="Render sections as markdown."),
-    out: Optional[Path] = typer.Option(None, "--out", "-o", help="Write to file instead of stdout."),
+    out: Path | None = typer.Option(None, "--out", "-o", help="Write to file instead of stdout."),  # noqa: B008
 ) -> None:
     """Retrieve one preprint's full text as structured JSON (default) or markdown.
 
@@ -193,7 +192,7 @@ def search(
     field: str = typer.Option("fulltext", "--field", help="fulltext | title | abstract | author."),
     source: str = typer.Option("europepmc", "--source", help="europepmc | openalex | arxiv."),
     limit: int = typer.Option(25, "--limit", "-n", help="Max hits."),
-    out: Optional[Path] = typer.Option(None, "--out", "-o", help="Write JSONL to file."),
+    out: Path | None = typer.Option(None, "--out", "-o", help="Write JSONL to file."),  # noqa: B008
 ) -> None:
     """Keyword search → SearchHit JSONL. --field scopes to title/abstract/author/fulltext."""
     settings = get_settings()
@@ -217,13 +216,13 @@ def search(
 
 @app.command()
 def discover(
-    query: Optional[str] = typer.Option(None, "--query", "-q", help="Free-text topic."),
-    category: Optional[str] = typer.Option(None, "--category", help="Subject/concept."),
-    since: Optional[str] = typer.Option(None, "--since", help="From date (YYYY-MM or YYYY-MM-DD)."),
-    to: Optional[str] = typer.Option(None, "--to", help="To date (YYYY-MM-DD)."),
+    query: str | None = typer.Option(None, "--query", "-q", help="Free-text topic."),
+    category: str | None = typer.Option(None, "--category", help="Subject/concept."),
+    since: str | None = typer.Option(None, "--since", help="From date (YYYY-MM or YYYY-MM-DD)."),
+    to: str | None = typer.Option(None, "--to", help="To date (YYYY-MM-DD)."),
     source: str = typer.Option("openalex", "--source", help="openalex | europepmc | arxiv."),
     limit: int = typer.Option(100, "--limit", "-n", help="Max hits."),
-    out: Optional[Path] = typer.Option(None, "--out", "-o", help="Write JSONL to file."),
+    out: Path | None = typer.Option(None, "--out", "-o", help="Write JSONL to file."),  # noqa: B008
 ) -> None:
     """Discover preprints by topic/category/date window → SearchHit JSONL."""
     from .sources.base import DiscoverQuery
@@ -253,18 +252,18 @@ def discover(
 
 @app.command()
 def ingest(
-    out: Path = typer.Argument(..., help="Output corpus path (JSONL, or .parquet with --format parquet)."),
+    out: Path = typer.Argument(..., help="Output corpus path (JSONL, or .parquet with --format parquet)."),  # noqa: B008
     source: str = typer.Option("s3", "--source", help="s3 | europepmc."),
     server: str = typer.Option("biorxiv", "--server", help="biorxiv | medrxiv | both (s3)."),
-    since: Optional[str] = typer.Option(None, "--since", help="From month YYYY-MM (Current_Content only)."),
-    query: Optional[str] = typer.Option(None, "--query", "-q", help="EPMC query (source=europepmc)."),
+    since: str | None = typer.Option(None, "--since", help="From month YYYY-MM (Current_Content only)."),
+    query: str | None = typer.Option(None, "--query", "-q", help="EPMC query (source=europepmc)."),
     include_back_content: bool = typer.Option(
         False, "--include-back-content", help="Also ingest undated S3 Back_Content batches."
     ),
     redistribution: bool = typer.Option(
         False, "--redistribution", help="Gate for a shareable corpus (degrade non-CC to stubs)."
     ),
-    limit: Optional[int] = typer.Option(None, "--limit", "-n", help="Max preprints (testing/sampling)."),
+    limit: int | None = typer.Option(None, "--limit", "-n", help="Max preprints (testing/sampling)."),
     fmt: str = typer.Option("jsonl", "--format", help="jsonl | parquet."),
 ) -> None:
     """Bulk full text → chunked corpus JSONL/Parquet. Resumable and incremental."""
@@ -355,7 +354,7 @@ def _to_parquet(jsonl_out: Path) -> None:
     pq.write_table(table, str(jsonl_out.with_suffix(".parquet")))
 
 
-def _run_hits(hits: Iterator[SearchHit], out: Optional[Path], limit: int) -> None:
+def _run_hits(hits: Iterator[SearchHit], out: Path | None, limit: int) -> None:
     from .sources.base import SourceError
 
     try:

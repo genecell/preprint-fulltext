@@ -966,7 +966,7 @@ def parse_jats(
     return art
 
 
-__all__ = ["ParsedArticle", "ParsedSection", "parse_jats", "_classify", "_norm", "append_legends_sections"]
+__all__ = ["ParsedArticle", "ParsedSection", "_classify", "_norm", "append_legends_sections", "parse_jats"]
 
 
 if __name__ == "__main__":  # pragma: no cover

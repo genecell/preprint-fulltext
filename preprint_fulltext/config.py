@@ -124,4 +124,4 @@ def get_settings() -> Settings:
     return Settings()
 
 
-__all__ = ["Settings", "get_settings", "DEFAULT_BIORXIV_BUCKET", "DEFAULT_MEDRXIV_BUCKET"]
+__all__ = ["DEFAULT_BIORXIV_BUCKET", "DEFAULT_MEDRXIV_BUCKET", "Settings", "get_settings"]

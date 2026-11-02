@@ -150,4 +150,4 @@ class Ingest:
         fh.flush()
 
 
-__all__ = ["Ingest", "Target", "IngestReport", "manifest_path_for"]
+__all__ = ["Ingest", "IngestReport", "Target", "manifest_path_for"]

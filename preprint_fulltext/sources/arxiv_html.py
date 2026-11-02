@@ -80,7 +80,7 @@ def parse_latexml_html(html_bytes: bytes) -> ParsedArticle:
     art = ParsedArticle()
     try:
         root = lxml_html.fromstring(html_bytes)
-    except Exception:
+    except Exception:  # noqa: BLE001
         return art
 
     title = root.xpath('//h1[contains(@class,"ltx_title_document")]')
@@ -154,7 +154,7 @@ class ArxivHTML:
                               resp.content)
                 if m:
                     return {"href": "https://" + m.group(0).decode("ascii"), "text": None}
-        except Exception:
+        except Exception:  # noqa: BLE001, S110
             pass
         return None
 
@@ -180,7 +180,7 @@ class ArxivHTML:
             from .arxiv import ArxivAPI
 
             meta = ArxivAPI(self.settings).get_metadata(aid, version=version)
-        except Exception:
+        except Exception:  # noqa: BLE001
             meta = None
         if meta is not None and not parsed.authors:
             parsed.authors = meta.authors

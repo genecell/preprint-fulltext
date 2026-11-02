@@ -98,6 +98,81 @@ class Section(BaseModel):
     title: str | None = None
     text: str = ""
     order: int
+    role: str | None = None
+
+
+class Figure(BaseModel):
+    """A figure float extracted from JATS <fig> or bioRxiv HTML div.fig."""
+
+    id: str | None = None
+    label: str | None = None
+    title: str | None = None
+    caption: str = ""
+    section_id: str | None = None
+    image_url: str | None = None
+
+
+class Table(BaseModel):
+    """A table float extracted from JATS <table-wrap> or bioRxiv HTML div.table."""
+
+    id: str | None = None
+    label: str | None = None
+    caption: str = ""
+    section_id: str | None = None
+    status: str = "parsed"
+    header_rows: int = 0
+    rows: list[list[str]] | None = None
+    markdown: str | None = None
+    footnotes: list[str] = Field(default_factory=list)
+    source_url: str | None = None
+    image_url: str | None = None
+
+
+class Link(BaseModel):
+    """An external hyperlink with character offsets into its section's text."""
+
+    section_id: str
+    start: int
+    end: int
+    text: str
+    url: str
+
+
+class Citation(BaseModel):
+    """A bibliographic citation or citation group with offsets into its section's text."""
+
+    section_id: str
+    start: int
+    end: int
+    text: str
+    ref_ids: list[str] = Field(default_factory=list)
+    removed: bool = False
+
+
+class Xref(BaseModel):
+    """An in-text cross-reference (fig, table, sec, disp-formula, etc.) with offsets."""
+
+    section_id: str
+    start: int
+    end: int
+    text: str
+    target: str | None = None
+    type: str | None = None
+
+
+class Formula(BaseModel):
+    """An inline or display formula with character offsets into its section's text."""
+
+    id: str | None = None
+    section_id: str
+    start: int
+    end: int
+    display: bool = False
+    label: str | None = None
+    tex: str | None = None
+    mathml: str | None = None
+    text: str | None = None
+    image_url: str | None = None
 
 
 class FullText(BaseModel):
@@ -105,10 +180,18 @@ class FullText(BaseModel):
 
     preprint: Preprint
     sections: list[Section] = Field(default_factory=list)
+    figures: list[Figure] = Field(default_factory=list)
+    tables: list[Table] = Field(default_factory=list)
+    links: list[Link] = Field(default_factory=list)
+    citations: list[Citation] = Field(default_factory=list)
+    xrefs: list[Xref] = Field(default_factory=list)
+    formulas: list[Formula] = Field(default_factory=list)
     retrieved_from: SourceName
     raw_ref: str | None = Field(
         default=None, description="Cache key / URI / object key the raw XML came from."
     )
+    text_format: str = "pf-text/2"
+    text_options: dict[str, Any] = Field(default_factory=dict)
 
 
 class Chunk(BaseModel):
@@ -125,6 +208,7 @@ class Chunk(BaseModel):
     char_end: int = Field(description="Exclusive end offset into the section text.")
     license: License
     source: SourceName
+    text_format: str = "pf-text/2"
 
 
 class SearchHit(BaseModel):
@@ -147,6 +231,12 @@ __all__ = [
     "License",
     "Preprint",
     "Section",
+    "Figure",
+    "Table",
+    "Link",
+    "Citation",
+    "Xref",
+    "Formula",
     "FullText",
     "Chunk",
     "SearchHit",

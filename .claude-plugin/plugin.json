@@ -1,6 +1,6 @@
 {
   "name": "preprint-fulltext",
-  "version": "0.1.0",
+  "version": "0.2.1",
   "description": "Retrieve full text of bioRxiv/medRxiv/arXiv preprints as structured sections to ground scientific reasoning and deep research, search/discover preprints, and build embedding-ready corpora (Europe PMC + openRxiv S3 + arXiv LaTeXML), via CLI and MCP.",
   "author": {
     "name": "Min Dai",

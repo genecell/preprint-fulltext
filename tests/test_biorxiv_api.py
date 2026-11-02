@@ -31,7 +31,11 @@ def _api():
 
 @respx.mock
 def test_get_metadata_parses_preprint():
-    respx.get(f"{BASE}/details/biorxiv/{DOI}").mock(return_value=httpx.Response(200, json=DETAILS))
+    d = json.loads(json.dumps(DETAILS))
+    d["collection"][0]["jatsxml"] = (
+        "https://www.biorxiv.org/content/early/2024/01/15/2024.01.15.575000.source.xml"
+    )
+    respx.get(f"{BASE}/details/biorxiv/{DOI}").mock(return_value=httpx.Response(200, json=d))
     p = _api().get_metadata(DOI, server="biorxiv")
     assert p.doi == DOI
     assert p.title == "A Test Preprint on Widgets"
@@ -41,6 +45,10 @@ def test_get_metadata_parses_preprint():
     assert p.abstract == "We study widgets."
     assert p.license.spdx_id == "CC-BY"
     assert p.published_doi == "10.1000/widgets.published"
+    assert (
+        p.provenance["jatsxml"]
+        == "https://www.biorxiv.org/content/early/2024/01/15/2024.01.15.575000.source.xml"
+    )
 
 
 @respx.mock

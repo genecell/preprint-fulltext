@@ -16,6 +16,7 @@ from ..core.assemble import build_fulltext
 from ..core.http import build_client, request_with_retry
 from ..core.jats import parse_jats
 from ..core.models import FullText, SearchHit, Server, SourceName
+from ..core.render import TextOptions
 from .base import DiscoverQuery
 
 BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest"
@@ -36,6 +37,7 @@ class EuropePMC:
     def __init__(self, settings: Settings | None = None, client=None):
         self.settings = settings or get_settings()
         self._client = client
+        self.last_error: str | None = None
 
     @property
     def client(self):
@@ -44,8 +46,8 @@ class EuropePMC:
         return self._client
 
     # --- resolution -----------------------------------------------------------
-    def resolve_ppr_id(self, doi: str) -> str | None:
-        """DOI -> Europe PMC PPR id via search."""
+    def _resolve_ppr_record(self, doi: str) -> dict | None:
+        """DOI -> Europe PMC search record for SRC:PPR."""
         params = {
             "query": f'DOI:"{doi}" AND SRC:PPR',
             "format": "json",
@@ -58,25 +60,45 @@ class EuropePMC:
         results = resp.json().get("resultList", {}).get("result", [])
         for r in results:
             if r.get("source") == "PPR" and r.get("id"):
-                return r["id"]
+                return r
         return None
 
+    def resolve_ppr_id(self, doi: str) -> str | None:
+        """DOI -> Europe PMC PPR id via search."""
+        rec = self._resolve_ppr_record(doi)
+        return rec["id"] if rec else None
+
     # --- full text ------------------------------------------------------------
-    def get_fulltext(self, doi: str, version: int | None = None) -> FullText | None:
-        ppr = self.resolve_ppr_id(doi)
-        if not ppr:
+    def get_fulltext(
+        self,
+        doi: str,
+        version: int | None = None,
+        *,
+        options: TextOptions | None = None,
+    ) -> FullText | None:
+        self.last_error = None
+        rec = self._resolve_ppr_record(doi)
+        if not rec:
+            self.last_error = "not-indexed"
             return None
+        if "inEPMC" in rec and rec.get("inEPMC") != "Y":
+            self.last_error = "not-in-epmc"
+            return None
+        ppr = rec["id"]
         # NB: the id already carries its source prefix (PPR…/PMC…); the endpoint is
         # /{id}/fullTextXML, NOT /{source}/{id}/fullTextXML (the latter 404s).
         url = f"{BASE}/{ppr}/fullTextXML"
-        resp = request_with_retry(self.client, "GET", url)
+        resp = request_with_retry(self.client, "GET", url, max_retries=0)
         if resp.status_code == 404:
+            self.last_error = "404"
             return None  # not OA -> router falls back to S3
         if resp.status_code != 200:
+            self.last_error = f"http-{resp.status_code}"
             return None
         xml = resp.content
-        parsed = parse_jats(xml)
+        parsed = parse_jats(xml, options=options)
         if not parsed.sections and not parsed.abstract:
+            self.last_error = "empty-xml"
             return None
         return build_fulltext(
             parsed,

@@ -31,14 +31,39 @@ def get_fulltext_impl(
     source: Optional[str] = None,
     server: Optional[str] = None,
     as_markdown: bool = False,
+    allow_html: bool = False,
+    links: str = "inline",
+    citations: str = "drop",
+    scripts: str = "caret",
+    subscripts: str = "flat",
+    math: str = "text",
+    paragraph_sep: str = " ",
+    legends_as_section: bool = False,
+    fetch_tables: bool = False,
 ):
     """Structured full text for a DOI (router: Europe PMC → S3; latest version by default)."""
     from .core.ids import split_doi_version
+    from .core.render import TextOptions
     from .pipeline.router import Router
 
+    opts = TextOptions(
+        links=links,  # type: ignore[arg-type]
+        citations=citations,  # type: ignore[arg-type]
+        scripts=scripts,  # type: ignore[arg-type]
+        subscripts=subscripts,  # type: ignore[arg-type]
+        math=math,  # type: ignore[arg-type]
+        paragraph_sep=paragraph_sep,
+        legends_as_section=legends_as_section,
+    )
     norm_doi, url_version = split_doi_version(doi)
     result = Router(get_settings()).get_fulltext(
-        norm_doi, version=version or url_version, source=source, server=server
+        norm_doi,
+        version=version or url_version,
+        source=source,
+        server=server,
+        allow_html=allow_html,
+        options=opts,
+        fetch_tables=fetch_tables,
     )
     if result.fulltext is None:
         return {"error": result.reason or "not found", "tried": result.tried, "doi": norm_doi}
@@ -130,12 +155,34 @@ def _tools() -> list[Tool]:
                 "properties": {
                     "doi": _str,
                     "version": {"type": "integer"},
+                    "source": {"type": "string", "enum": ["europepmc", "s3", "html", "arxiv"]},
+                    "allow_html": {"type": "boolean"},
                     "as_markdown": {"type": "boolean"},
+                    "links": {"type": "string", "enum": ["inline", "text"]},
+                    "citations": {"type": "string", "enum": ["drop", "keep"]},
+                    "scripts": {"type": "string", "enum": ["caret", "unicode"]},
+                    "subscripts": {"type": "string", "enum": ["flat", "underscore"]},
+                    "math": {"type": "string", "enum": ["text", "tex", "placeholder"]},
+                    "paragraph_sep": _str,
+                    "legends_as_section": {"type": "boolean"},
+                    "fetch_tables": {"type": "boolean"},
                 },
                 "required": ["doi"],
             },
-            lambda doi, version=None, as_markdown=False: get_fulltext_impl(
-                doi, version=version, as_markdown=as_markdown
+            lambda doi, version=None, source=None, allow_html=False, as_markdown=False, links="inline", citations="drop", scripts="caret", subscripts="flat", math="text", paragraph_sep=" ", legends_as_section=False, fetch_tables=False: get_fulltext_impl(
+                doi,
+                version=version,
+                source=source,
+                allow_html=allow_html,
+                as_markdown=as_markdown,
+                links=links,
+                citations=citations,
+                scripts=scripts,
+                subscripts=subscripts,
+                math=math,
+                paragraph_sep=paragraph_sep,
+                legends_as_section=legends_as_section,
+                fetch_tables=fetch_tables,
             ),
         ),
         Tool(

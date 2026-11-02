@@ -83,6 +83,23 @@ def _render_markdown(ft: FullText) -> str:
         lines.append("")
         lines.append(s.text)
         lines.append("")
+    if ft.figures and not any(s.role == "figure_legends" for s in ft.sections):
+        lines.append("## Figures")
+        lines.append("")
+        for f in ft.figures:
+            head = f"**{f.label}:** " if f.label else ""
+            lines.append(f"- {head}{f.caption}".strip())
+        lines.append("")
+    if ft.tables and not any(s.role == "tables" for s in ft.sections):
+        lines.append("## Tables")
+        lines.append("")
+        for t in ft.tables:
+            head = f"{t.label}: {t.caption}" if (t.label and t.caption) else (t.label or t.caption or "Table")
+            lines.append(f"### {head}")
+            if t.markdown:
+                lines.append("")
+                lines.append(t.markdown)
+            lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -103,7 +120,19 @@ def get(
     ),
     server: Optional[str] = typer.Option(None, "--server", help="biorxiv | medrxiv (hint for S3/HTML)."),
     html: bool = typer.Option(
-        False, "--html", help="Allow the public HTML page as a last-resort fallback (interactive only)."
+        False, "--html", help="Allow the public HTML page when Europe PMC / S3 do not return full text."
+    ),
+    links: str = typer.Option("inline", "--links", help="inline | text (default: inline)."),
+    citations: str = typer.Option("drop", "--citations", help="drop | keep (default: drop)."),
+    scripts: str = typer.Option("caret", "--scripts", help="caret | unicode (default: caret)."),
+    subscripts: str = typer.Option("flat", "--subscripts", help="flat | underscore (default: flat)."),
+    math: str = typer.Option("text", "--math", help="text | tex | placeholder (default: text)."),
+    paragraph_sep: str = typer.Option(" ", "--paragraph-sep", help="Paragraph separator (e.g. '\\n\\n')."),
+    legends_as_section: bool = typer.Option(
+        False, "--legends-as-section", help="Also append 'Figure legends' and 'Tables' sections."
+    ),
+    fetch_tables: bool = typer.Option(
+        False, "--fetch-tables", help="Opt-in: fetch external Highwire table markup on the HTML route."
     ),
     markdown: bool = typer.Option(False, "--markdown", "-m", help="Render sections as markdown."),
     out: Optional[Path] = typer.Option(None, "--out", "-o", help="Write to file instead of stdout."),
@@ -113,10 +142,27 @@ def get(
     Accepts a bioRxiv/medRxiv DOI or content URL, a https://doi.org/… URL, or an arXiv id
     / arxiv.org URL / 10.48550/arXiv.* DOI (routed to arXiv's LaTeXML full text).
     """
+    from .core.render import TextOptions
     from .pipeline.router import Router
 
+    sep = paragraph_sep.replace("\\n", "\n")
+    opts = TextOptions(
+        links=links,  # type: ignore[arg-type]
+        citations=citations,  # type: ignore[arg-type]
+        scripts=scripts,  # type: ignore[arg-type]
+        subscripts=subscripts,  # type: ignore[arg-type]
+        math=math,  # type: ignore[arg-type]
+        paragraph_sep=sep,
+        legends_as_section=legends_as_section,
+    )
     result = Router(get_settings()).get_fulltext(
-        doi, version=version, source=source, server=server, allow_html=html
+        doi,
+        version=version,
+        source=source,
+        server=server,
+        allow_html=html,
+        options=opts,
+        fetch_tables=fetch_tables,
     )
     if result.fulltext is None:
         typer.secho(

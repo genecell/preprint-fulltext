@@ -15,6 +15,7 @@ from preprint_fulltext.sources.biorxiv_s3 import (
     BiorxivS3,
     doi_posting_date,
     extract_article_xml,
+    extract_zip_xml_entry,
     month_folder,
     parse_month_folder,
 )
@@ -145,3 +146,55 @@ def test_missing_credentials_raises(monkeypatch):
     with pytest.raises(SourceError) as ei:
         _ = src.client
     assert "credentials" in str(ei.value).lower()
+
+
+def test_extract_zip_xml_entry_and_range_inflate(tmp_path):
+    import os
+
+    # Create a large .meca (>30 KB of incompressible figure bytes) so 4 KB tail + ~1 KB XML slice are exercised.
+    big_meca = make_meca(
+        SAMPLE_XML,
+        article_name="content/575000.xml",
+        extra_content={"content/fig1.tif": os.urandom(30_000)},
+    )
+    entry = extract_zip_xml_entry(big_meca[-4096:], total_size=len(big_meca))
+    assert entry is not None
+    assert entry.xml_stem == "575000"
+    assert entry.xml_filename == "content/575000.xml"
+
+    with mock_aws():
+        client = boto3.client("s3", region_name="us-east-1")
+        client.create_bucket(Bucket=BUCKET)
+        # Put a decoy paper (different stem) + target paper (575000) + post-2020 wrap-around paper
+        decoy_meca = make_meca(
+            SAMPLE_XML.replace(DOI.encode(), b"10.1101/2024.01.15.111111"),
+            article_name="content/111111.xml",
+            extra_content={"content/fig1.tif": os.urandom(50_000)},
+        )
+        old_wrap_meca = make_meca(
+            SAMPLE_XML.replace(DOI.encode(), b"10.1101/575000"),
+            article_name="content/575000.xml",
+            extra_content={"content/fig1.tif": os.urandom(50_000)},
+        )
+        client.put_object(
+            Bucket=BUCKET, Key="Current_Content/January_2024/001-decoy.meca", Body=decoy_meca
+        )
+        client.put_object(
+            Bucket=BUCKET, Key="Current_Content/January_2024/002-old-wrap.meca", Body=old_wrap_meca
+        )
+        client.put_object(
+            Bucket=BUCKET, Key="Current_Content/January_2024/003-target.meca", Body=big_meca
+        )
+        rec = RecordingClient(client)
+        src = BiorxivS3(settings=Settings(cache_dir=tmp_path), client=rec)
+        ft = src.get_fulltext(DOI, server="biorxiv")
+        assert ft is not None and ft.preprint.doi == DOI
+        # Verify we never downloaded the 50 KB decoy figure bytes!
+        assert src.bytes_downloaded < 25_000
+        # Second lookup in the same folder uses the SQLite index (0 new 4 KB tail reads)
+        before = src.bytes_downloaded
+        ft_legacy = src.get_fulltext(
+            "10.1101/575000", server="biorxiv", candidate_dates=["2024-01-15"]
+        )
+        assert ft_legacy is not None and ft_legacy.preprint.doi == "10.1101/575000"
+        assert (src.bytes_downloaded - before) < 5_000

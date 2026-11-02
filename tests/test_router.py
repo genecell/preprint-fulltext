@@ -152,3 +152,56 @@ def test_allow_html_falls_back_to_html(monkeypatch):
     assert result.fulltext is not None
     assert result.fulltext.retrieved_from is SourceName.BIORXIV_HTML
     assert "biorxiv_html" in result.tried
+
+
+@respx.mock
+def test_tier2_jatsxml_succeeds_and_circuit_breaker_falls_back_to_s3(monkeypatch, tmp_path):
+    respx.get(f"{EPMC}/search").mock(return_value=httpx.Response(200, json=EMPTY))
+    jats_url = "https://www.biorxiv.org/content/early/2024/01/15/2024.01.15.575000.source.xml"
+    details = {
+        "collection": [
+            {
+                "doi": DOI,
+                "title": "A Test Preprint on Widgets",
+                "authors": "Lovelace, A.",
+                "date": "2024-01-15",
+                "version": "1",
+                "category": "neuroscience",
+                "license": "cc_no",
+                "jatsxml": jats_url,
+                "published": "NA",
+            }
+        ]
+    }
+    respx.get(f"https://api.biorxiv.org/details/biorxiv/{DOI}").mock(
+        return_value=httpx.Response(200, json=details)
+    )
+    # Case 1: Tier 2 direct jatsxml succeeds
+    Router._biorxiv_web_blocked = False
+    respx.get(jats_url).mock(return_value=httpx.Response(200, content=SAMPLE_XML))
+    r1 = Router(Settings(cache_dir=tmp_path)).get_fulltext(DOI, server="biorxiv", allow_html=True)
+    assert r1.fulltext is not None
+    assert "biorxiv_jats_xml" in r1.tried
+    assert "biorxiv_s3" not in r1.tried
+
+    # Case 2: Tier 2 hits Cloudflare 403 -> trips circuit breaker and resolves via Tier 3 (S3)
+    respx.get(jats_url).mock(
+        return_value=httpx.Response(403, content=b"<html>Just a moment... Cloudflare</html>")
+    )
+    with mock_aws():
+        client = boto3.client("s3", region_name="us-east-1")
+        client.create_bucket(Bucket=BUCKET)
+        client.put_object(
+            Bucket=BUCKET,
+            Key=KEY,
+            Body=make_meca(SAMPLE_XML, article_name="content/575000.xml"),
+        )
+        from preprint_fulltext.sources.biorxiv_s3 import BiorxivS3
+
+        r2_router = Router(Settings(cache_dir=tmp_path))
+        r2_router._s3 = lambda: BiorxivS3(Settings(cache_dir=tmp_path), client=client)
+        r2 = r2_router.get_fulltext(DOI, server="biorxiv", allow_html=True)
+    assert r2.fulltext is not None
+    assert r2.tried == ["europepmc", "biorxiv_jats_xml", "biorxiv_s3"]
+    assert Router._biorxiv_web_blocked is True
+    Router._biorxiv_web_blocked = False

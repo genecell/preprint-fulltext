@@ -5,4 +5,4 @@ Ports-and-adapters toolkit: sources map into a canonical pydantic model
 frontends over the same core library.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.1"

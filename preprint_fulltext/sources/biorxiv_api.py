@@ -48,7 +48,11 @@ def _entry_to_preprint(e: dict, server: Server) -> Preprint:
         abstract=e.get("abstract") or None,
         license=parse_license(e.get("license")),
         published_doi=published_doi,
-        provenance={"source": "biorxiv_api", "server": server.value},
+        provenance={
+            "source": "biorxiv_api",
+            "server": server.value,
+            "jatsxml": (e.get("jatsxml") or None),
+        },
     )
 
 
